@@ -6,9 +6,18 @@
 		{
 			CoordX = coordX;
 			CoordY = coordY;
+
+			IsSelected = false;
+		}
+
+		public void ToggleSelection()
+		{
+			IsSelected = !IsSelected;
 		}
 
 		public int CoordX { get; }
 		public int CoordY { get; }
+
+		public bool IsSelected { get; private set; }
 	}
 }

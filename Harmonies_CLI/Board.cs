@@ -5,6 +5,14 @@
 		public Board()
 		{
 			CreateCells();
+
+			var topLeftCell = Cells.MinBy(cell => cell.CoordX + cell.CoordY);
+			if (topLeftCell != null)
+			{
+				cursorX = topLeftCell.CoordX;
+				cursorY = topLeftCell.CoordY;
+				topLeftCell.ToggleSelection();
+			}
 		}
 
 		protected abstract void CreateCells();
@@ -22,6 +30,23 @@
 				DrawLine(3, 0, currentCoordY);
 
 				currentCoordY += 1;
+			}
+		}
+
+		public void MoveCursor(int deltaX, int deltaY)
+		{
+			var selectedCell = Cells.FirstOrDefault(cell => cell.IsSelected);
+			
+			var newCursorX = cursorX + deltaX;
+			var newCursorY = cursorY + deltaY;
+			var newSelectedCell = Cells.FirstOrDefault(cell => cell.CoordX == newCursorX && cell.CoordY == newCursorY);
+			if (newSelectedCell != null)
+			{
+				newSelectedCell.ToggleSelection();
+				cursorX = newCursorX;
+				cursorY = newCursorY;
+
+				selectedCell?.ToggleSelection();
 			}
 		}
 
@@ -65,14 +90,38 @@
 				switch (line)
 				{
 					case 0:
+						if (cell.IsSelected)
+						{
+							Console.ForegroundColor = cellSelectedColor;
+						}
 						Console.Write("[----]");
+						Console.ForegroundColor = cellUnselectedColor;
 						break;
 					case 1:
 					case 2:
-						Console.Write("[      ]");
+						if (cell.IsSelected)
+						{
+							Console.ForegroundColor = cellSelectedColor;
+						}
+						Console.Write("[");
+						Console.ForegroundColor = cellUnselectedColor;
+
+						Console.Write("      ");
+
+						if (cell.IsSelected)
+						{
+							Console.ForegroundColor = cellSelectedColor;
+						}
+						Console.Write("]");
+						Console.ForegroundColor = cellUnselectedColor;
 						break;
 					case 3:
+						if (cell.IsSelected)
+						{
+							Console.ForegroundColor = cellSelectedColor;
+						}
 						Console.Write("[====]");
+						Console.ForegroundColor = cellUnselectedColor;
 						break;
 				}
 			}
@@ -91,6 +140,12 @@
 		}
 
 		int MaxCoordX => Cells.Max(cell => cell.CoordX);
+
+		int cursorX;
+		int cursorY;
+
+		ConsoleColor cellSelectedColor = ConsoleColor.Magenta;
+		ConsoleColor cellUnselectedColor = ConsoleColor.White;
 
 		protected List<Cell> Cells => cells ??= new List<Cell>();
 		List<Cell>? cells;
