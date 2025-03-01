@@ -4,8 +4,7 @@
 	{
 		public HarmoniesGame()
 		{
-			// board = new Board_TypeA();
-			board = new Board_TypeB();
+			boardPanel = new BoardPanel(new Board_TypeA());
 		}
 
 		public void Run()
@@ -22,31 +21,16 @@
 		void DrawUI()
 		{
 			Console.Clear();
-			board.DrawBoard();
+			boardPanel.Draw();
 		}
 
 		void ProcessKeyInput(ConsoleKey key)
 		{
-			if (key == ConsoleKey.LeftArrow)
-			{
-				board.MoveCursor(-1, -1);
-			}
-			else if (key == ConsoleKey.RightArrow)
-			{
-				board.MoveCursor(1, 1);
-			}
-			else if (key == ConsoleKey.UpArrow)
-			{
-				board.MoveCursor(0, -1);
-			}
-			else if (key == ConsoleKey.DownArrow)
-			{
-				board.MoveCursor(0, 1);
-			}
+			boardPanel.ProcessKey(key);
 		}
 
 		bool IsGameEnd => false;
 
-		Board board;
+		IPanel boardPanel;
 	}
 }

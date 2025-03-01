@@ -1,25 +1,42 @@
 ﻿namespace Harmonies_CLI
 {
-	abstract class Board
+	class BoardPanel : IPanel
 	{
-		public Board()
+		public BoardPanel(Board board)
 		{
-			CreateCells();
+			this.board = board;
+		}
 
-			var topLeftCell = Cells.MinBy(cell => cell.CoordX + cell.CoordY);
-			if (topLeftCell != null)
+		Board board;
+
+		void IPanel.Draw()
+		{
+			DrawBoard();
+		}
+
+		void IPanel.ProcessKey(ConsoleKey key)
+		{
+			if (key == ConsoleKey.LeftArrow)
 			{
-				cursorX = topLeftCell.CoordX;
-				cursorY = topLeftCell.CoordY;
-				topLeftCell.ToggleSelection();
+				board.MoveCursor(-1, -1);
+			}
+			else if (key == ConsoleKey.RightArrow)
+			{
+				board.MoveCursor(1, 1);
+			}
+			else if (key == ConsoleKey.UpArrow)
+			{
+				board.MoveCursor(0, -1);
+			}
+			else if (key == ConsoleKey.DownArrow)
+			{
+				board.MoveCursor(0, 1);
 			}
 		}
 
-		protected abstract void CreateCells();
-
-		public void DrawBoard()
+		void DrawBoard()
 		{
-			var maxCoordY = Cells.Where(cell => cell.CoordX == 0).Max(cell => cell.CoordY);
+			var maxCoordY = board.Cells.Where(cell => cell.CoordX == 0).Max(cell => cell.CoordY);
 			var currentCoordY = 0;
 
 			while (currentCoordY <= maxCoordY)
@@ -33,23 +50,6 @@
 			}
 		}
 
-		public void MoveCursor(int deltaX, int deltaY)
-		{
-			var selectedCell = Cells.FirstOrDefault(cell => cell.IsSelected);
-			
-			var newCursorX = cursorX + deltaX;
-			var newCursorY = cursorY + deltaY;
-			var newSelectedCell = Cells.FirstOrDefault(cell => cell.CoordX == newCursorX && cell.CoordY == newCursorY);
-			if (newSelectedCell != null)
-			{
-				newSelectedCell.ToggleSelection();
-				cursorX = newCursorX;
-				cursorY = newCursorY;
-
-				selectedCell?.ToggleSelection();
-			}
-		}
-
 		void DrawLine(int line, int startCoordX, int startCoordY)
 		{
 			var coordX = startCoordX;
@@ -60,19 +60,19 @@
 				Console.Write(" ");
 			}
 
-			while (coordX <= MaxCoordX)
+			while (coordX <= board.MaxCoordX)
 			{
-				var cell = Cells.FirstOrDefault(cell => cell.CoordX == coordX && cell.CoordY == coordY);
+				var cell = board.Cells.FirstOrDefault(cell => cell.CoordX == coordX && cell.CoordY == coordY);
 				DrawCell(cell, line);
 
 				if (line <= 1)
 				{
-					var adjacentCell = Cells.FirstOrDefault(cell => cell.CoordX == coordX + 1 && cell.CoordY == coordY);
+					var adjacentCell = board.Cells.FirstOrDefault(cell => cell.CoordX == coordX + 1 && cell.CoordY == coordY);
 					DrawCell(adjacentCell, line + 2);
 				}
 				else
 				{
-					var adjacentCell = Cells.FirstOrDefault(cell => cell.CoordX == coordX + 1 && cell.CoordY == coordY + 1);
+					var adjacentCell = board.Cells.FirstOrDefault(cell => cell.CoordX == coordX + 1 && cell.CoordY == coordY + 1);
 					DrawCell(adjacentCell, line - 2);
 				}
 
@@ -94,7 +94,7 @@
 						{
 							Console.ForegroundColor = cellSelectedColor;
 						}
-						Console.Write("[----]");
+						Console.Write($"{cellLeftBorder}{cellTopBorder}{cellRightBorder}");
 						Console.ForegroundColor = cellUnselectedColor;
 						break;
 					case 1:
@@ -103,16 +103,16 @@
 						{
 							Console.ForegroundColor = cellSelectedColor;
 						}
-						Console.Write("[");
+						Console.Write($"{cellLeftBorder}");
 						Console.ForegroundColor = cellUnselectedColor;
 
-						Console.Write("      ");
+						Console.Write($"{cellMiddle}");
 
 						if (cell.IsSelected)
 						{
 							Console.ForegroundColor = cellSelectedColor;
 						}
-						Console.Write("]");
+						Console.Write($"{cellRightBorder}");
 						Console.ForegroundColor = cellUnselectedColor;
 						break;
 					case 3:
@@ -120,7 +120,7 @@
 						{
 							Console.ForegroundColor = cellSelectedColor;
 						}
-						Console.Write("[====]");
+						Console.Write($"{cellLeftBorder}{cellBottomBorder}{cellRightBorder}");
 						Console.ForegroundColor = cellUnselectedColor;
 						break;
 				}
@@ -129,25 +129,25 @@
 			{
 				if (line == 0 || line == 3)
 				{
-					Console.Write("      ");
+					Console.Write($"{emptyCellShort}");
 
 				}
 				else
 				{
-					Console.Write("        ");
+					Console.Write($"{emptyCell}");
 				}
 			}
 		}
 
-		int MaxCoordX => Cells.Max(cell => cell.CoordX);
-
-		int cursorX;
-		int cursorY;
+		const string cellLeftBorder = "[";
+		const string cellRightBorder = "]";
+		const string cellTopBorder = "----";
+		const string cellBottomBorder = "====";
+		const string cellMiddle = "      ";
+		const string emptyCellShort = "      ";
+		const string emptyCell = "        ";
 
 		ConsoleColor cellSelectedColor = ConsoleColor.Magenta;
 		ConsoleColor cellUnselectedColor = ConsoleColor.White;
-
-		protected List<Cell> Cells => cells ??= new List<Cell>();
-		List<Cell>? cells;
 	}
 }
