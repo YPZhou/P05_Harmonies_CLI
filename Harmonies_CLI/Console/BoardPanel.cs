@@ -1,4 +1,6 @@
-﻿namespace Harmonies_CLI
+﻿using static Harmonies_CLI.Constants;
+
+namespace Harmonies_CLI
 {
 	class BoardPanel : IPanel
 	{
@@ -12,6 +14,7 @@
 		void IPanel.Draw()
 		{
 			DrawBoard();
+			DrawLegend();
 		}
 
 		void IPanel.ProcessKey(ConsoleKey key)
@@ -38,22 +41,28 @@
 		{
 			var maxCoordY = board.Cells.Where(cell => cell.CoordX == 0).Max(cell => cell.CoordY);
 			var currentCoordY = 0;
+			var padLeft = 20;
 
 			while (currentCoordY <= maxCoordY)
 			{
-				DrawLine(0, 0, currentCoordY);
-				DrawLine(1, 0, currentCoordY);
-				DrawLine(2, 0, currentCoordY);
-				DrawLine(3, 0, currentCoordY);
+				DrawLine(0, padLeft, 0, currentCoordY);
+				DrawLine(1, padLeft, 0, currentCoordY);
+				DrawLine(2, padLeft, 0, currentCoordY);
+				DrawLine(3, padLeft, 0, currentCoordY);
 
 				currentCoordY += 1;
 			}
 		}
 
-		void DrawLine(int line, int startCoordX, int startCoordY)
+		void DrawLine(int line, int padLeft, int startCoordX, int startCoordY)
 		{
 			var coordX = startCoordX;
 			var coordY = startCoordY;
+
+			for (var i = 0; i < padLeft; i++)
+			{
+				Console.Write(' ');
+			}
 
 			if (line == 0 || line == 3)
 			{
@@ -87,6 +96,39 @@
 		{
 			if (cell != null)
 			{
+				var cellLineInfo = cell[line];
+				var oldBackground = Console.BackgroundColor;
+				switch (cellLineInfo)
+				{
+					case CellLineInfo.EMPTY:
+						Console.BackgroundColor = ConsoleColor.DarkGray;
+						break;
+					case CellLineInfo.WOOD:
+						Console.BackgroundColor = ConsoleColor.Green;
+						break;
+					case CellLineInfo.DIRT:
+						Console.BackgroundColor = ConsoleColor.DarkRed;
+						break;
+					case CellLineInfo.ROCK:
+						Console.BackgroundColor = ConsoleColor.Gray;
+						break;
+					case CellLineInfo.FARM:
+						Console.BackgroundColor = ConsoleColor.Yellow;
+						break;
+					case CellLineInfo.HOUSE:
+						Console.BackgroundColor = ConsoleColor.Red;
+						break;
+					case CellLineInfo.WATER:
+						Console.BackgroundColor = ConsoleColor.Blue;
+						break;
+					case CellLineInfo.ANIMAL:
+						Console.BackgroundColor = ConsoleColor.DarkYellow;
+						break;
+					case CellLineInfo.SPIRIT:
+						Console.BackgroundColor = ConsoleColor.White;
+						break;
+				}
+
 				switch (line)
 				{
 					case 0:
@@ -124,6 +166,8 @@
 						Console.ForegroundColor = cellUnselectedColor;
 						break;
 				}
+
+				Console.BackgroundColor = oldBackground;
 			}
 			else
 			{
@@ -137,6 +181,52 @@
 					Console.Write($"{emptyCell}");
 				}
 			}
+		}
+
+		void DrawLegend()
+		{
+			var oldBackground = Console.BackgroundColor;
+			Console.BackgroundColor = ConsoleColor.Green;
+			Console.Write("    ");
+			Console.BackgroundColor = oldBackground;
+			Console.Write(" 树  ");
+
+			Console.BackgroundColor = ConsoleColor.DarkRed;
+			Console.Write("    ");
+			Console.BackgroundColor = oldBackground;
+			Console.WriteLine(" 土");
+
+			Console.BackgroundColor = ConsoleColor.Gray;
+			Console.Write("    ");
+			Console.BackgroundColor = oldBackground;
+			Console.Write(" 石  ");
+
+			Console.BackgroundColor = ConsoleColor.Yellow;
+			Console.Write("    ");
+			Console.BackgroundColor = oldBackground;
+			Console.WriteLine(" 田");
+
+			Console.BackgroundColor = ConsoleColor.Red;
+			Console.Write("    ");
+			Console.BackgroundColor = oldBackground;
+			Console.Write(" 房  ");
+
+			Console.BackgroundColor = ConsoleColor.Blue;
+			Console.Write("    ");
+			Console.BackgroundColor = oldBackground;
+			Console.WriteLine(" 河");
+
+			Console.BackgroundColor = ConsoleColor.DarkYellow;
+			Console.Write("    ");
+			Console.BackgroundColor = oldBackground;
+			Console.Write(" 动  ");
+
+			Console.BackgroundColor = ConsoleColor.White;
+			Console.Write("    ");
+			Console.BackgroundColor = oldBackground;
+			Console.WriteLine(" 魂");
+
+			Console.MoveBufferArea(0, Console.CursorTop - 4, 16, 4, 0, 4);
 		}
 
 		const string cellLeftBorder = "[";

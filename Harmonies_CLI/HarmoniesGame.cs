@@ -9,6 +9,8 @@
 
 		public void Run()
 		{
+			Console.CursorVisible = false;
+
 			while (!IsGameEnd)
 			{
 				DrawUI();
