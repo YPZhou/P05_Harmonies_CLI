@@ -15,6 +15,7 @@ namespace Harmonies_CLI
 		{
 			DrawBoard();
 			DrawLegend();
+			DrawCursorDetails();
 		}
 
 		void IPanel.ProcessKey(ConsoleKey key)
@@ -41,7 +42,7 @@ namespace Harmonies_CLI
 		{
 			var maxCoordY = board.Cells.Where(cell => cell.CoordX == 0).Max(cell => cell.CoordY);
 			var currentCoordY = 0;
-			var padLeft = 20;
+			var padLeft = 30;
 
 			while (currentCoordY <= maxCoordY)
 			{
@@ -98,36 +99,7 @@ namespace Harmonies_CLI
 			{
 				var cellLineInfo = cell[line];
 				var oldBackground = Console.BackgroundColor;
-				switch (cellLineInfo)
-				{
-					case CellLineInfo.EMPTY:
-						Console.BackgroundColor = ConsoleColor.DarkGray;
-						break;
-					case CellLineInfo.WOOD:
-						Console.BackgroundColor = ConsoleColor.Green;
-						break;
-					case CellLineInfo.DIRT:
-						Console.BackgroundColor = ConsoleColor.DarkRed;
-						break;
-					case CellLineInfo.ROCK:
-						Console.BackgroundColor = ConsoleColor.Gray;
-						break;
-					case CellLineInfo.FARM:
-						Console.BackgroundColor = ConsoleColor.Yellow;
-						break;
-					case CellLineInfo.HOUSE:
-						Console.BackgroundColor = ConsoleColor.Red;
-						break;
-					case CellLineInfo.WATER:
-						Console.BackgroundColor = ConsoleColor.Blue;
-						break;
-					case CellLineInfo.ANIMAL:
-						Console.BackgroundColor = ConsoleColor.DarkYellow;
-						break;
-					case CellLineInfo.SPIRIT:
-						Console.BackgroundColor = ConsoleColor.White;
-						break;
-				}
+				Console.BackgroundColor = cellLineInfo.GetCellLineColor();
 
 				switch (line)
 				{
@@ -189,44 +161,77 @@ namespace Harmonies_CLI
 			Console.BackgroundColor = ConsoleColor.Green;
 			Console.Write("    ");
 			Console.BackgroundColor = oldBackground;
-			Console.Write(" 树  ");
+			Console.Write(" 树木  ");
 
 			Console.BackgroundColor = ConsoleColor.DarkRed;
 			Console.Write("    ");
 			Console.BackgroundColor = oldBackground;
-			Console.WriteLine(" 土");
+			Console.WriteLine(" 泥土");
 
 			Console.BackgroundColor = ConsoleColor.Gray;
 			Console.Write("    ");
 			Console.BackgroundColor = oldBackground;
-			Console.Write(" 石  ");
+			Console.Write(" 岩石  ");
 
 			Console.BackgroundColor = ConsoleColor.Yellow;
 			Console.Write("    ");
 			Console.BackgroundColor = oldBackground;
-			Console.WriteLine(" 田");
+			Console.WriteLine(" 农田");
 
 			Console.BackgroundColor = ConsoleColor.Red;
 			Console.Write("    ");
 			Console.BackgroundColor = oldBackground;
-			Console.Write(" 房  ");
+			Console.Write(" 房屋  ");
 
 			Console.BackgroundColor = ConsoleColor.Blue;
 			Console.Write("    ");
 			Console.BackgroundColor = oldBackground;
-			Console.WriteLine(" 河");
+			Console.WriteLine(" 河流");
 
 			Console.BackgroundColor = ConsoleColor.DarkYellow;
 			Console.Write("    ");
 			Console.BackgroundColor = oldBackground;
-			Console.Write(" 动  ");
+			Console.Write(" 动物  ");
 
 			Console.BackgroundColor = ConsoleColor.White;
 			Console.Write("    ");
 			Console.BackgroundColor = oldBackground;
-			Console.WriteLine(" 魂");
+			Console.WriteLine(" 灵魂");
 
-			Console.MoveBufferArea(0, Console.CursorTop - 4, 16, 4, 0, 4);
+			var legendWidth = 20;
+			var legendHeight = 4;
+			Console.MoveBufferArea(0, Console.CursorTop - legendHeight, legendWidth, legendHeight, 0, 4);
+		}
+
+		void DrawCursorDetails()
+		{
+			var selectedCell = board.Cells.FirstOrDefault(cell => cell.IsSelected);
+			if (selectedCell != null)
+			{
+				Console.WriteLine($"当前格坐标 {selectedCell.CoordX},{selectedCell.CoordY}");
+
+				var placedTokenDetailsHeight = 0;
+				var placedLines = selectedCell.Lines.Where(line => !line.IsEmpty).OrderBy(line => line.Line);
+				if (placedLines.Any())
+				{
+					Console.WriteLine();
+					Console.WriteLine("已放置标记");
+					foreach (var placedLine in placedLines)
+					{
+						Console.Write($"{4 - placedLine.Line}层 ");
+						var oldBackground = Console.BackgroundColor;
+						Console.BackgroundColor = placedLine.CellLineInfo.GetCellLineColor();
+						Console.WriteLine("    ");
+						Console.BackgroundColor = oldBackground;
+					}
+
+					placedTokenDetailsHeight = 2 + placedLines.Count();
+				}
+
+				var detailsWidth = 20;
+				var detailsHeight = 1 + placedTokenDetailsHeight;
+				Console.MoveBufferArea(0, Console.CursorTop - detailsHeight, detailsWidth, detailsHeight, 0, 10);
+			}
 		}
 
 		const string cellLeftBorder = "[";
